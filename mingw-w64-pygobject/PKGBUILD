@@ -15,11 +15,14 @@ makedepends=("${MINGW_PACKAGE_PREFIX}-python2"
              "${MINGW_PACKAGE_PREFIX}-gobject-introspection"
              "${MINGW_PACKAGE_PREFIX}-gnome-common")
 options=('staticlibs' 'strip')
-source=(http://ftp.gnome.org/pub/gnome/sources/pygobject/${pkgver%.*}/${_realname}-${pkgver}.tar.xz)
-md5sums=('268c1052f2f08d344aa41863bbef62a0')
+source=(http://ftp.gnome.org/pub/gnome/sources/pygobject/${pkgver%.*}/${_realname}-${pkgver}.tar.xz
+        configureac-Merge-multiple-platform-case-statement.patch)
+md5sums=('268c1052f2f08d344aa41863bbef62a0'
+         '2e4faabde36e35e64ed24b7d5174529a')
 
 prepare() {
   cd "${srcdir}/${_realname}-${pkgver}"
+  patch -Np1 -i "${srcdir}"/configureac-Merge-multiple-platform-case-statement.patch
   autoreconf -fi
   #WANT_AUTOMAKE=latest ./autogen.sh
 }
