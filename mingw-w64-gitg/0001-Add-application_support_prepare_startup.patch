@@ -1,0 +1,120 @@
+From e46658768b36ccd9a721751cd4e80404d7fdec8e Mon Sep 17 00:00:00 2001
+From: Ignacio Casal Quinteiro <icq@gnome.org>
+Date: Tue, 22 Dec 2015 18:37:36 +0100
+Subject: [PATCH 1/4] Add application_support_prepare_startup
+
+This is implemented on windows to deal with the console output
+of the application
+---
+ gitg/gitg-application.vala            |  2 ++
+ libgitg/gitg-platform-support-osx.c   |  5 +++++
+ libgitg/gitg-platform-support-win32.c | 27 +++++++++++++++++++++++++++
+ libgitg/gitg-platform-support.c       |  5 +++++
+ libgitg/gitg-platform-support.h       |  2 ++
+ vapi/gitg-platform-support.vapi       |  1 +
+ 6 files changed, 42 insertions(+)
+
+diff --git a/gitg/gitg-application.vala b/gitg/gitg-application.vala
+index f2b8854..b6bd3f4 100644
+--- a/gitg/gitg-application.vala
++++ b/gitg/gitg-application.vala
+@@ -321,6 +321,8 @@ public class Application : Gtk.Application
+ 	{
+ 		base.startup();
+ 
++		PlatformSupport.application_support_prepare_startup();
++
+ 		try
+ 		{
+ 			Gitg.init();
+diff --git a/libgitg/gitg-platform-support-osx.c b/libgitg/gitg-platform-support-osx.c
+index aa224da..c047107 100644
+--- a/libgitg/gitg-platform-support-osx.c
++++ b/libgitg/gitg-platform-support-osx.c
+@@ -218,4 +218,9 @@ gitg_platform_support_get_user_home_dir (const gchar *name)
+ 	return g_strdup (pwd->pw_dir);
+ }
+ 
++void
++gitg_platform_support_application_support_prepare_startup (void)
++{
++}
++
+ // ex:ts=4 noet
+diff --git a/libgitg/gitg-platform-support-win32.c b/libgitg/gitg-platform-support-win32.c
+index 11a3b7d..ca7f725 100644
+--- a/libgitg/gitg-platform-support-win32.c
++++ b/libgitg/gitg-platform-support-win32.c
+@@ -107,4 +107,31 @@ gitg_platform_support_get_user_home_dir (const gchar *name)
+ 	return NULL;
+ }
+ 
++void
++gitg_platform_support_application_support_prepare_startup (void)
++{
++	/* If we open gedit from a console get the stdout printing */
++	if (fileno (stdout) != -1 &&
++	    _get_osfhandle (fileno (stdout)) != -1)
++	{
++		/* stdout is fine, presumably redirected to a file or pipe */
++	}
++	else
++	{
++		typedef BOOL (* WINAPI AttachConsole_t) (DWORD);
++
++		AttachConsole_t p_AttachConsole =
++			(AttachConsole_t) GetProcAddress (GetModuleHandle ("kernel32.dll"),
++			                                  "AttachConsole");
++
++		if (p_AttachConsole != NULL && p_AttachConsole (ATTACH_PARENT_PROCESS))
++		{
++			freopen ("CONOUT$", "w", stdout);
++			dup2 (fileno (stdout), 1);
++			freopen ("CONOUT$", "w", stderr);
++			dup2 (fileno (stderr), 2);
++		}
++	}
++}
++
+ // ex:ts=4 noet
+diff --git a/libgitg/gitg-platform-support.c b/libgitg/gitg-platform-support.c
+index 483b798..9f2e9f8 100644
+--- a/libgitg/gitg-platform-support.c
++++ b/libgitg/gitg-platform-support.c
+@@ -145,4 +145,9 @@ gitg_platform_support_get_user_home_dir (const gchar *name)
+ 	return g_strdup (pwd->pw_dir);
+ }
+ 
++void
++gitg_platform_support_application_support_prepare_startup (void)
++{
++}
++
+ // ex:ts=4 noet
+diff --git a/libgitg/gitg-platform-support.h b/libgitg/gitg-platform-support.h
+index 266db4d..1e014c1 100644
+--- a/libgitg/gitg-platform-support.h
++++ b/libgitg/gitg-platform-support.h
+@@ -52,6 +52,8 @@ gchar        *gitg_platform_support_get_data_dir (void);
+ 
+ gchar        *gitg_platform_support_get_user_home_dir (const gchar *name);
+ 
++void          gitg_platform_support_application_support_prepare_startup (void);
++
+ #endif /* __GITG_PLATFORM_SUPPORT_H__ */
+ 
+ // ex:ts=4 noet
+diff --git a/vapi/gitg-platform-support.vapi b/vapi/gitg-platform-support.vapi
+index 5071a95..44ee63a 100644
+--- a/vapi/gitg-platform-support.vapi
++++ b/vapi/gitg-platform-support.vapi
+@@ -19,5 +19,6 @@ namespace Gitg
+ 		public static string get_locale_dir();
+ 		public static string get_data_dir();
+ 		public static string? get_user_home_dir(string? user = null);
++		public static void application_support_prepare_startup();
+ 	}
+ }
+-- 
+2.5.0
+

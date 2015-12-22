@@ -1,0 +1,52 @@
+From 7e6ef1ee1cc7d5035a9a903759b95ebfb4d88a0c Mon Sep 17 00:00:00 2001
+From: Ignacio Casal Quinteiro <icq@gnome.org>
+Date: Tue, 22 Dec 2015 18:39:54 +0100
+Subject: [PATCH 2/4] Compile with -mwindows flag on windows
+
+---
+ configure.ac     | 13 +++++++++++++
+ gitg/Makefile.am |  4 ++++
+ 2 files changed, 17 insertions(+)
+
+diff --git a/configure.ac b/configure.ac
+index ea12fd5..98c7571 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -122,6 +122,19 @@ AM_CONDITIONAL(PLATFORM_WIN32, test x"$PLATFORM_NAME" = "xwin32")
+ 
+ AC_DEFINE_UNQUOTED(PLATFORM_NAME,"$PLATFORM_NAME", [platform name])
+ 
++AC_MSG_CHECKING([for native Win32])
++case "$host" in
++	*-*-mingw*)
++		os_win32=yes
++		;;
++	*)
++		os_win32=no
++		;;
++esac
++
++AC_MSG_RESULT([$os_win32])
++AM_CONDITIONAL(OS_WIN32, test "$os_win32" = "yes")
++
+ PKG_CHECK_MODULES(LIBGITG, [
+ 	gthread-2.0 >= $GLIB_REQUIRED_VERSION
+ 	glib-2.0 >= $GLIB_REQUIRED_VERSION
+diff --git a/gitg/Makefile.am b/gitg/Makefile.am
+index 44e2f41..00aedbc 100644
+--- a/gitg/Makefile.am
++++ b/gitg/Makefile.am
+@@ -47,6 +47,10 @@ gitg_gitg_LDFLAGS =						\
+ 	-no-undefined						\
+ 	-export-symbols-regex "^[[^_]].*"
+ 
++if OS_WIN32
++gitg_gitg_LDFLAGS += -mwindows
++endif
++
+ gitg_gitg_VALASOURCES =						\
+ 	gitg/commit/gitg-commit-dialog.vala			\
+ 	gitg/commit/gitg-commit-paned.vala			\
+-- 
+2.5.0
+
