@@ -30,10 +30,12 @@ license=("GPL2+")
 url="https://wiki.gnome.org/Apps/Gitg"
 install=${_realname}-${CARCH}.install
 source=(http://ftp.gnome.org/pub/gnome/sources/${_realname}/${pkgver:0:4}/${_realname}-$pkgver.tar.xz
+        0001-Add-platform-support-for-getting-user-home-directory.patch
         0001-Add-application_support_prepare_startup.patch
         0002-Compile-with-mwindows-flag-on-windows.patch
         0003-win32-Add-ico-resource-to-the-final-binary.patch)
 sha256sums=('52968be7d3dffaf20d14b25ca68773bf8ce73b32c5c8d3eac63cea0721c7a709'
+            '778588ce8ac87278dc5979ee66411a8baec07425660f99c857b886053691e566'
             '21253e89f7a1afe848c641344e9ebc3e1f21eca0edabbe9f9de0fd9a52eb9256'
             'ee0a8333cf3074e33c8c866c9a9323953b615a16114a1e6fb649292d8dd1ae7f'
             '4a4bfbc11bbddd44b56cd031622d6e4b5a06541f37dad4f4064edeb90a8592d5')
@@ -41,6 +43,7 @@ sha256sums=('52968be7d3dffaf20d14b25ca68773bf8ce73b32c5c8d3eac63cea0721c7a709'
 prepare() {
   cd "${srcdir}"/${_realname}-${pkgver}
 
+  patch -Np1 -i "${srcdir}/0001-Add-platform-support-for-getting-user-home-directory.patch"
   patch -Np1 -i "${srcdir}/0001-Add-application_support_prepare_startup.patch"
   patch -Np1 -i "${srcdir}/0002-Compile-with-mwindows-flag-on-windows.patch"
   patch -Np1 -i "${srcdir}/0003-win32-Add-ico-resource-to-the-final-binary.patch"

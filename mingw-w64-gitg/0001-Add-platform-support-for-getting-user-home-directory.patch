@@ -1,0 +1,144 @@
+From a0d448304ddd2165c8cce79985b32a17b36e98f8 Mon Sep 17 00:00:00 2001
+From: Jesse van den Kieboom <jessevdk@gnome.org>
+Date: Tue, 22 Dec 2015 09:56:05 +0100
+Subject: [PATCH] Add platform support for getting user home directory
+
+---
+ libgitg/gitg-platform-support-osx.c   | 28 ++++++++++++++++++++++++++++
+ libgitg/gitg-platform-support-win32.c |  7 +++++++
+ libgitg/gitg-platform-support.c       | 28 ++++++++++++++++++++++++++++
+ libgitg/gitg-platform-support.h       |  2 ++
+ vapi/gitg-platform-support.vapi       |  1 +
+ 5 files changed, 66 insertions(+)
+
+diff --git a/libgitg/gitg-platform-support-osx.c b/libgitg/gitg-platform-support-osx.c
+index 20e385f..aa224da 100644
+--- a/libgitg/gitg-platform-support-osx.c
++++ b/libgitg/gitg-platform-support-osx.c
+@@ -26,6 +26,9 @@
+ #include <gdk/gdkquartz.h>
+ #include <gio/gunixinputstream.h>
+ 
++#include <sys/types.h>
++#include <pwd.h>
++
+ gboolean
+ gitg_platform_support_use_native_window_controls (GdkDisplay *display)
+ {
+@@ -190,4 +193,29 @@ gitg_platform_support_get_data_dir (void)
+ 	return g_strdup (GITG_DATADIR);
+ }
+ 
++gchar *
++gitg_platform_support_get_user_home_dir (const gchar *name)
++{
++	struct passwd *pwd;
++
++	if (name == NULL)
++	{
++		name = g_get_user_name ();
++	}
++
++	if (name == NULL)
++	{
++		return NULL;
++	}
++
++	pwd = getpwnam (name);
++
++	if (pwd == NULL)
++	{
++		return NULL;
++	}
++
++	return g_strdup (pwd->pw_dir);
++}
++
+ // ex:ts=4 noet
+diff --git a/libgitg/gitg-platform-support-win32.c b/libgitg/gitg-platform-support-win32.c
+index a2bcb85..11a3b7d 100644
+--- a/libgitg/gitg-platform-support-win32.c
++++ b/libgitg/gitg-platform-support-win32.c
+@@ -100,4 +100,11 @@ gitg_platform_support_get_data_dir (void)
+ 	return data_dir;
+ }
+ 
++gchar *
++gitg_platform_support_get_user_home_dir (const gchar *name)
++{
++	// TODO
++	return NULL;
++}
++
+ // ex:ts=4 noet
+diff --git a/libgitg/gitg-platform-support.c b/libgitg/gitg-platform-support.c
+index 6bea618..483b798 100644
+--- a/libgitg/gitg-platform-support.c
++++ b/libgitg/gitg-platform-support.c
+@@ -25,6 +25,9 @@
+ 
+ #include <gio/gunixinputstream.h>
+ 
++#include <sys/types.h>
++#include <pwd.h>
++
+ gboolean
+ gitg_platform_support_use_native_window_controls (GdkDisplay *display)
+ {
+@@ -117,4 +120,29 @@ gitg_platform_support_get_data_dir (void)
+ 	return g_strdup (GITG_DATADIR);
+ }
+ 
++gchar *
++gitg_platform_support_get_user_home_dir (const gchar *name)
++{
++	struct passwd *pwd;
++
++	if (name == NULL)
++	{
++		name = g_get_user_name ();
++	}
++
++	if (name == NULL)
++	{
++		return NULL;
++	}
++
++	pwd = getpwnam (name);
++
++	if (pwd == NULL)
++	{
++		return NULL;
++	}
++
++	return g_strdup (pwd->pw_dir);
++}
++
+ // ex:ts=4 noet
+diff --git a/libgitg/gitg-platform-support.h b/libgitg/gitg-platform-support.h
+index aacc29c..266db4d 100644
+--- a/libgitg/gitg-platform-support.h
++++ b/libgitg/gitg-platform-support.h
+@@ -50,6 +50,8 @@ gchar        *gitg_platform_support_get_locale_dir (void);
+ 
+ gchar        *gitg_platform_support_get_data_dir (void);
+ 
++gchar        *gitg_platform_support_get_user_home_dir (const gchar *name);
++
+ #endif /* __GITG_PLATFORM_SUPPORT_H__ */
+ 
+ // ex:ts=4 noet
+diff --git a/vapi/gitg-platform-support.vapi b/vapi/gitg-platform-support.vapi
+index 18e1c5f..5071a95 100644
+--- a/vapi/gitg-platform-support.vapi
++++ b/vapi/gitg-platform-support.vapi
+@@ -18,5 +18,6 @@ namespace Gitg
+ 		public static string get_lib_dir();
+ 		public static string get_locale_dir();
+ 		public static string get_data_dir();
++		public static string? get_user_home_dir(string? user = null);
+ 	}
+ }
+-- 
+2.5.0
+
