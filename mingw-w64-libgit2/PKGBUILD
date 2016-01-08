@@ -17,13 +17,16 @@ depends=("${MINGW_PACKAGE_PREFIX}-curl"
          "${MINGW_PACKAGE_PREFIX}-zlib")
 makedepends=("${MINGW_PACKAGE_PREFIX}-cmake" "${MINGW_PACKAGE_PREFIX}-gcc")
 source=(${_realname}-${pkgver}.tar.gz::"https://github.com/libgit2/libgit2/archive/v${pkgver}.tar.gz"
-        libgit2-error-string.patch)
+        libgit2-error-string.patch
+        openssl.patch)
 md5sums=('b7db3ab71dfa19fe1dc7fef76d6af216'
-         '3ba35235bca627b630df75304b506ff8')
+         '3ba35235bca627b630df75304b506ff8'
+         '9e0182d8ae00f214ad906f3cba27446b')
 
 prepare() {
   cd ${_realname}-${pkgver}
   patch -p1 -i ${srcdir}/libgit2-error-string.patch
+  patch -p1 -i ${srcdir}/openssl.patch
 }
 
 build() {
