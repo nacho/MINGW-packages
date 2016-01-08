@@ -21,7 +21,7 @@ source=(${_realname}-${pkgver}.tar.gz::"https://github.com/libgit2/libgit2/archi
         openssl.patch)
 md5sums=('b7db3ab71dfa19fe1dc7fef76d6af216'
          '3ba35235bca627b630df75304b506ff8'
-         '9e0182d8ae00f214ad906f3cba27446b')
+         'e5e238a7fec16f1042791052188e4d65')
 
 prepare() {
   cd ${_realname}-${pkgver}
