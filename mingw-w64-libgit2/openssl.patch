@@ -1,8 +1,17 @@
 diff --git a/src/global.c b/src/global.c
-index 3f20bfd..ffa14f2 100644
+index 3f20bfd..5d29e16 100644
 --- a/src/global.c
 +++ b/src/global.c
-@@ -106,10 +106,16 @@ static void init_ssl(void)
+@@ -97,6 +97,8 @@ static void init_ssl(void)
+ 	ssl_opts |= SSL_OP_NO_COMPRESSION;
+ #endif
+ 
++	fprintf(stderr, "init ssl\n");
++
+ 	SSL_load_error_strings();
+ 	OpenSSL_add_ssl_algorithms();
+ 	/*
+@@ -106,10 +108,16 @@ static void init_ssl(void)
  	 * to speak TLSv1 to perform the encryption itself.
  	 */
  	git__ssl_ctx = SSL_CTX_new(SSLv23_method());
