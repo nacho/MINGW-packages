@@ -1,0 +1,26 @@
+From d4ee36831f09c034dc9c4ccba8c33fdd5d2f91c5 Mon Sep 17 00:00:00 2001
+From: Ignacio Casal Quinteiro <icq@gnome.org>
+Date: Tue, 27 Sep 2016 10:34:04 +0200
+Subject: [PATCH] Do not duplicate the fds
+
+---
+ libgitg/gitg-platform-support-win32.c | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/libgitg/gitg-platform-support-win32.c b/libgitg/gitg-platform-support-win32.c
+index debb9fc..6fc80b7 100644
+--- a/libgitg/gitg-platform-support-win32.c
++++ b/libgitg/gitg-platform-support-win32.c
+@@ -138,9 +138,7 @@ gitg_platform_support_application_support_prepare_startup (void)
+ 		if (p_AttachConsole != NULL && p_AttachConsole (ATTACH_PARENT_PROCESS))
+ 		{
+ 			freopen ("CONOUT$", "w", stdout);
+-			dup2 (fileno (stdout), 1);
+ 			freopen ("CONOUT$", "w", stderr);
+-			dup2 (fileno (stderr), 2);
+ 		}
+ 	}
+ }
+-- 
+2.9.3
+
